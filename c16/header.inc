@@ -8,8 +8,8 @@ SCREENH = $19
 SCREENC = $0800
 SCREENM = $0c00
 
-BACKGND	= $31
-WHT	= $71
-RED	= $52
-GRN	= $55
-YEL	= $57
+BACKGND	= $51
+WHT	= $31
+RED	= $32
+GRN	= $35
+YEL	= $37

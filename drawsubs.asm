@@ -91,6 +91,7 @@ dlocsta	sta	$ffff		;   *drawloc++ = *dsymloc++;
 	lda	#SCREENW - 5	;
 	clc			;
 	adc	dlocsta+1	;
+	sta	dlocsta+1	;
 	lda	dlocsta+2	;
 	adc	#0		;
 	sta	dlocsta+2	;  drawloc += SCREENW - 5; // next row on screen
