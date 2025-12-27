@@ -7,3 +7,9 @@ SCREENW = $28
 SCREENH = $19
 SCREENC = $d400
 SCREENM = $d000
+
+BACKGND = $0b
+WHT	= $01
+RED	= $02
+GRN	= $05
+YEL	= $07

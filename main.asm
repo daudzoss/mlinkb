@@ -1,3 +1,8 @@
+MISSING	= 0
+MIDLINK = 1
+TOPLINK = 2
+BOTLINK = 3
+
 .if BASIC
 *	= BASIC+1
 .else
@@ -22,16 +27,14 @@ COPIED2	= $0400
 	.word	(+), 2055
 	.text	$99,$22,$1f,$09	; PRINT " CHR(31) CHR$(9) // BLU,enable
 	.text	$8e,$08,$13	; CHR$(142) CHR$(8) CHR$(19) // UPPER,disabl,clr
-.if BKGRNDC ;not VIC20
-	.text	$13		; second clr undoes windows on C16, C128....
-.endif
+	.text	$13		; second home undoes windows on C16, C128....
 topline	.text	$12,"(",$92,","
 	.text	$12,")",$92,"top "
 	.text	$12,"<",$92,","
 	.text	$12,">",$92,"bot "
 	.text	$12,"i",$92,","
 	.text	$12,"k",$92,"slide"
-.if BKGRNDC ;not VIC20
+.if SCREENW >= $27
 	.text	" daudzoss/mlin5k"
 .endif
 	.text	$22		; "
@@ -65,5 +68,8 @@ main
 	lda	#$0f		;// P500 has to start in bank 15
 	sta	$01		;static volatile int execute_bank = 15;
 .endif
+	lda	#BACKGND	;void main(void) [
+	sta	BKGRNDC		; BKGRNDC = BACKGND
+ jmp drawall
 finish
 .end
