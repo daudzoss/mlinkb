@@ -23,6 +23,16 @@ rndmove	lda	jumpvec		;void rndmove(void) {
 	sta	jumpvec		;
 rndjump	jmp	(jumpvec)	;} // rndmove()
 
+shuffle	ldy	#<$100		;void shuffle(void) {
+-	dey			; for (auto uint9_t y = 256; y; y--)
+	tya			;
+	pha			;
+	jsr	rndmove		;  rndmove();
+	pla			;
+	tay			;
+	bne	-		;
+	rts			;} // shuffle()
+	
 downby1	lda	state+0		;uint4_t downby1(void) {
 	sta	state+$10	; state[16] = state[0]; // temptop
 	ldy	#0		;
