@@ -1,4 +1,4 @@
-missing	.byte	0		;static uint4_t missing = 0;
+missing	.byte	0		;static int4_t missing = 0;
 
 .align	16
 
@@ -23,8 +23,50 @@ rndmove	lda	jumpvec		;void rndmove(void) {
 	sta	jumpvec		;
 rndjump	jmp	(jumpvec)	;} // rndmove()
 
-allleft	rts
-allrght	rts
+downby1	lda	state+0		;uint4_t downby1(void) {
+	sta	state+$10	; state[16] = state[0]; // temptop
+	ldy	#0		;
+-	lda	state+1,y	; for (register uint5_t y = 0; y < 0x10; y++)
+	sta	state,y		;  state[y] = state[y+1];
+	iny			;
+	cpy	#$10		;
+	bne	-		;
+	lda	#$ff		;
+	clc			;
+	adc	missing		;
+	bpl	+		; if (--missing < 0)
+	lda	#$0f		;  missing = 15;
++	sta	missing		; return missing & 0x7f;
+	rts			;} // downby1()
+
+upby1	lda	state+$0f	;uint4_t upby1(void) {
+	sta	state-1		; state[-1] = state[15]; // tempbot
+	ldy	#$10		;
+-	lda	state-2,y	; for (register uint5_t y = 16; y > 0; y--)
+	sta	state-1,y	;  state[y-1] = state[y-2];
+	dey			;
+	bne	-		;
+	lda	#1		;
+	clc			;
+	adc	missing		;
+	cmp	#$10		;
+	bcc	+		; if (++missing > 15)
+	lda	#0		;  missing = 0;
++	sta	missing		; return missing & 0x7f;
+	rts			;} // upby1()
+
+allleft	jsr	downby1		;uint4_t allleft(void) { register uint4_t a;
+	jsr	downby1		; for (int unrolled = 4; unrolled; unrolled--)
+	jsr	downby1		;  a = downby1();
+	jsr	downby1		; return a; // new value of missing
+	rts			;} // alleft()
+
+allrght	jsr	upby1		;uint4_t allrght(void) { register uint4_t a;
+	jsr	upby1		; for (int unrolled = 4; unrolled; unrolled--)
+	jsr	upby1		;  a = upby1();
+	jsr	upby1		; return a; // new value of missing
+	rts			;} // allrght()
+
 slideup	rts
 slidedn	rts
 topleft	rts

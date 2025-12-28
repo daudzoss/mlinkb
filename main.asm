@@ -70,6 +70,7 @@ start
 
 .include "movesubs.asm"
 
+tempbot	.fill	1		;static uint8_t tempbot;
 state	.byte	NOTLINK		;static uint8_t state[16] = { NOTLINK,
 	.byte	TOPLINK|WHT	;                             TOPLINK|WHT,
 	.byte	MIDLINK|WHT	;                             MIDLINK|WHT,
@@ -86,6 +87,7 @@ state	.byte	NOTLINK		;static uint8_t state[16] = { NOTLINK,
 	.byte	MIDLINK|GRN	;                             MIDLINK|GRN,
 	.byte	MIDLINK|GRN	;                             MIDLINK|GRN,
 	.byte	BOTLINK|GRN	;                             BOTLINK|GRN };
+temptop	.fill	1		;static uint8_t temptop;
 main
 .if !BASIC
 	lda	#$0f		;// P500 has to start in bank 15
