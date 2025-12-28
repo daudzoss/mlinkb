@@ -23,11 +23,11 @@ dsymloc	= dsymlda + 1		;static char* dsymloc;
 drawloc	= dlocsta + 1		;static char* drawloc;
 attrloc	= alocsta + 1		;static char* attrloc;
 
-symset .byte $30,$30,$30,$30,$30;static const symset[4][25] = { {
-       .byte $30,$30,$30,$30,$30;
-       .byte $30,$30,$30,$30,$30;
-       .byte $30,$30,$30,$30,$30;
-       .byte $30,$30,$30,$30,$30;
+symset .byte $20,$20,$20,$20,$20;static const symset[4][25] = { {
+       .byte $20,$20,$20,$20,$20;
+       .byte $20,$20,$20,$20,$20;
+       .byte $20,$20,$20,$20,$20;
+       .byte $20,$20,$20,$20,$20;
 	.byte	0,0,0,0,0,0,0	;
        .byte $31,$31,$31,$31,$31;
        .byte $31,$31,$31,$31,$31;
@@ -50,25 +50,26 @@ symset .byte $30,$30,$30,$30,$30;static const symset[4][25] = { {
 count5i	.fill	1		;void drawtil(register uint8_t a) {
 count5j	.fill	1		; static uint8_t count5i, count5j;
 attrcod	.fill	1		; static char attrcod;
+NORZSET	= 	drawtil+4	;
 drawtil	sta	attrcod		;
+	and	#$c0		; static const norzset = 0xc0;
 	lsr			;
-	and	#$60		;
 	clc			;
 	adc	#<symset	;
 	sta	dsymloc		;
 	lda	#>symset	;
 	adc	#0		;
 	sta	1+dsymloc	; dsymloc = symset[a>>6]; // tile type 0~3,
-	lda	attrcod		;
-	and	#$3f		;
-	sta	attrcod		; attrcod = a & 0x3f; // tile attribute (color)
 	lda	#5		;
 	sta	count5i		; for (count5i = 5; count5i; count5i--) {
 -	lda	#5		;
 	sta	count5j		;  for (count5j = 5; count5j; count5j--) {
 -	lda	attrcod		;
-alocsta	sta	$ffff		;   *attrloc++ = attrcod;
-	inc	alocsta+1	;
+	bit	NORZSET		;
+	beq	+		;   if (attrcod & 0xc0) // not the MISSING tile,
+	and	#$3f		;	
+alocsta	sta	$ffff		;    *attrloc++ = attrcod & 0x3f; // set a color
++	inc	alocsta+1	;
 	bne	dsymlda		;
 	inc	alocsta+2	;
 dsymlda	lda	$ffff		;

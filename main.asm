@@ -26,8 +26,13 @@ COPIED2	= $0400
 .endif
 	.word	(+), 2055
 	.text	$99,$22,$1f,$09	; PRINT " CHR(31) CHR$(9) // BLU,enable
-	.text	$8e,$08,$13	; CHR$(142) CHR$(8) CHR$(19) // UPPER,disabl,clr
-	.text	$13		; second home undoes windows on C16, C128....
+	.text	$8e,$08,$93,$13	; CHR$(142) CHR$(8) CHR$(19) // UPPER,disabl,clr
+	.text	$13,$11		; second home undoes windows on C16, C128....
+	.text	$11,$11,$11,$11
+	.text	$11,$11,$11,$11
+	.text	$11,$11,$11,$11
+	.text	$11,$11,$11,$11
+	.text	$11,$11,$11,$11
 topline	.text	$12,"(",$92,","
 	.text	$12,")",$92,"top "
 	.text	$12,"<",$92,","
@@ -47,22 +52,22 @@ topline	.text	$12,"(",$92,","
 
 start
 .include "drawsubs.asm"
-state	.byte	0
+state	.byte	MISSING
 	.byte	TOPLINK|WHT
 	.byte	MIDLINK|WHT
 	.byte	BOTLINK|WHT
 	.byte	TOPLINK|RED
 	.byte	MIDLINK|RED
-	.byte	TOPLINK|RED
 	.byte	MIDLINK|RED
-	.byte	TOPLINK|RED
-	.byte	MIDLINK|RED
-	.byte	TOPLINK|RED
-	.byte	MIDLINK|RED
-	.byte	TOPLINK|RED
-	.byte	MIDLINK|RED
-	.byte	TOPLINK|RED
-	.byte	MIDLINK|RED
+	.byte	BOTLINK|RED
+	.byte	TOPLINK|YEL
+	.byte	MIDLINK|YEL
+	.byte	MIDLINK|YEL
+	.byte	BOTLINK|YEL
+	.byte	TOPLINK|GRN
+	.byte	MIDLINK|GRN
+	.byte	MIDLINK|GRN
+	.byte	BOTLINK|GRN
 main
 .if !BASIC
 	lda	#$0f		;// P500 has to start in bank 15
@@ -70,6 +75,9 @@ main
 .endif
 	lda	#BACKGND	;void main(void) [
 	sta	BKGRNDC		; BKGRNDC = BACKGND
- jmp drawall
+	jsr	drawall		; drawall();
+-	jsr	$ffe4		;
+	beq	-		;
+	rts			;
 finish
 .end
