@@ -1,35 +1,41 @@
 missing	.byte	0		;static int4_t missing = 0;
 
+jumpvec	.fill	2		;static uint8_t (*jumpvec)(void);
 .align	16
-
-jumpto0	.word	allleft
-jumpto1	.word	allrght
-jumpto2	.word	slideup
-jumpto3	.word	slidedn
-jumpto4	.word	topleft
-jumpto5	.word	toprght
-jumpto6	.word	botleft
-jumpto7	.word	botrght
-
-jumpvec	.word	jumpto0
-
-rndmove	lda	jumpvec		;void rndmove(void) {
-	and	#$f0		;
-	sta	jumpvec		;
-	lda	RNDLOC1		;
+jumpto0	.word	allleft		;static uint8_t (*jumpto)(void)[8] = { allleft,
+jumpto1	.word	allrght		;                                      allright,
+jumpto2	.word	slideup		;                                      slideup,
+jumpto3	.word	slidedn		;                                      slidedn,
+jumpto4	.word	topleft		;                                      topleft,
+jumpto5	.word	toprght		;                                      toprght,
+jumpto6	.word	botleft		;                                      botleft,
+jumpto7	.word	botrght		;                                      botrght};
+rndmove	lda	RNDLOC1		;uint8_t rndmove(void) {
 	eor	RNDLOC2		;
 	and	#$0e		;
-	ora	jumpvec		;
+	tay			; register uint3_t y = rand(8);
+	lda	jumpto0,y	;
 	sta	jumpvec		;
-rndjump	jmp	(jumpvec)	;} // rndmove()
+	lda	jumpto0+1,y	; jumpvec = jumpto[y];
+	sta	jumpvec+1	; return (*jumpvec)();
+ tya
+ lsr
+ ora #$30
+ sta SCREENM
+- jsr $ffe4
+ cmp SCREENM
+ bne -
+	jmp	(jumpvec)	;} // rndmove()
+
 shuffle	ldy	#<$100		;void shuffle(void) {
--	dey			; for (auto uint9_t y = 256; y; y--)
+-	dey			; for (auto uint9_t y = 256; y; y--) {
 	tya			;
 	pha			;
 	jsr	rndmove		;  rndmove();
+	jsr	drawall		;  drawall();
 	pla			;
 	tay			;
-	bne	-		;
+	bne	-		; }
 	rts			;} // shuffle()
 	
 downby1	lda	state+0		;uint4_t downby1(void) {
@@ -75,10 +81,32 @@ allrght	jsr	upby1		;uint4_t allrght(void) { register uint4_t a;
 	jsr	upby1		; return a; // new value of missing
 	rts			;} // allrght()
 
-slideup	rts
-slidedn	rts
-
 rowmask	.byte	$03		;static const uint8_t rowmask = 0x03;
+
+slideup	lda	missing		;uint4_t slideup(void) {
+	tay			; register uint8_t y = missing; // old value
+	and	#$03;rowmask	;
+	cmp	#$03		;
+	beq	+		; if (missing & rowmask != 3) {
+	inc	missing		;  missing += 1;
+	lda	state+1,y	;
+	sta	state,y		;  state[y] = state[missing];
+	lda	#NOTLINK	;  state[missing] = NOTLINK;
+	sta	state+1,y	; }
++	lda	missing		; return missing;
+	rts			;} // slideup()
+slidedn	lda	missing		;uint4_t slidedn(void) {
+	tay			; register uint8_t y = missing; // old value
+	bit	rowmask		;
+	beq	+		; if (missing & rowmask != 0) {
+	dec	missing		;  missing -= 1;
+	lda	state-1,y	;
+	sta	state,y		;  state[y] = state[missing];
+	lda	#NOTLINK	;  state[missing] = NOTLINK;
+	sta	state-1,y	; }
++	lda	missing		; return missing;
+	rts			;} // slidedn()
+
 topleft	lda	state+0		;uint4_t topleft(void) {
 	pha			; uint8_t temp = state[0];
 	lda	state+4		;
@@ -164,38 +192,38 @@ botrght	lda	state+$f	;uint4_t botrght(void) {
 ;;; codedupl
 +	rts			;} // botrght()
 
-getmove	jsr	$ffe4		;void getmove(void) {
+getmove	jsr	$ffe4		;int8_t getmove(void) {
 	beq	getmove		; switch (register char a = getchar()) {
 
 	cmp	#'['		; case '[':
 	beq	+		;
 	cmp	#':'		; case ':':
-	beq	+		;
-	cmp	#'0'		; case '0':
+;	beq	+		;
+;	cmp	#'0'		; case '0':
 	bne	++		;  return allleft(a);
 +	jmp	allleft		;
 
 +	cmp	#']'		; case ']':
 	beq	+		;
 	cmp	#$3b		; case ';':
-	beq	+		;
-	cmp	#'1'		; case '1':
+;	beq	+		;
+;	cmp	#'1'		; case '1':
 	bne	++		;  return allrght(a);
 +	jmp	allrght		;
 
 +	cmp	#'i'		; case 'i':
 	beq	+		;
 	cmp	#'I'		; case 'I':
-	beq	+		;
-	cmp	#'2'		; case '2':
+;	beq	+		;
+;	cmp	#'2'		; case '2':
 	bne	++		;  return slideup(a);
 +	jmp	slideup		;
 
 +	cmp	#'k'		; case 'k':
 	beq	+		;
 	cmp	#'K'		; case 'K':
-	beq	+		;
-	cmp	#'3'		; case '3':
+;	beq	+		;
+;	cmp	#'3'		; case '3':
 	bne	++		;  return slidedn(a);
 +	jmp	slidedn		;
 	
@@ -206,8 +234,8 @@ getmove	jsr	$ffe4		;void getmove(void) {
 	cmp	#'u'		; case 'u':
 	beq	+		;
 	cmp	#'U'		; case 'U':
-	beq	+		;
-	cmp	#'4'		; case '4':
+;	beq	+		;
+;	cmp	#'4'		; case '4':
 	bne	++		;  return topleft(a);
 +	jmp	topleft		;
 
@@ -218,8 +246,8 @@ getmove	jsr	$ffe4		;void getmove(void) {
 	cmp	#'o'		; case 'o':
 	beq	+		;
 	cmp	#'O'		; case 'O':
-	beq	+		;
-	cmp	#'5'		; case '5':
+;	beq	+		;
+;	cmp	#'5'		; case '5':
 	bne	++		;  return toprght(a);
 +	jmp	toprght		;
 
@@ -230,8 +258,8 @@ getmove	jsr	$ffe4		;void getmove(void) {
 	cmp	#'j'		; case 'j':
 	beq	+		;
 	cmp	#'J'		; case 'J':
-	beq	+		;
-	cmp	#'6'		; case '6':
+;	beq	+		;
+;	cmp	#'6'		; case '6':
 	bne	++		;  return botleft(a);
 +	jmp	botleft		;
 
@@ -242,8 +270,9 @@ getmove	jsr	$ffe4		;void getmove(void) {
 	cmp	#'l'		; case 'l':
 	beq	+		;
 	cmp	#'L'		; case 'L':
-	beq	+		;
-	cmp	#'7'		; case '7':
+;	beq	+		;
+;	cmp	#'7'		; case '7':
 	bne	++		;  return botrght(a);
 +	jmp	botrght		; }
-+	rts			;} // getmove()
++	lda	#$ff		; return -1;
+	rts			;} // getmove()

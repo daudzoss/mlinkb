@@ -95,8 +95,9 @@ main
 .endif
 	lda	#BACKGND	;void main(void) [
 	sta	BKGRNDC		; BKGRNDC = BACKGND;
--	jsr	drawall		; do { drawall();
-	jsr	getmove		; getmove(); } while (1);
+	jsr	shuffle		; shuffle();
+-	jsr	getmove		; do { getmove();
+	jsr	drawall		;      drawall(); } while (1);
 	jmp	-		;}
 
 finish
