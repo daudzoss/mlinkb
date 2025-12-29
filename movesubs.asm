@@ -228,6 +228,8 @@ getmove	jsr	$ffe4		;int8_t getmove(void) {
 	cmp	#'w'		;
 	beq	+		;
 	cmp	#'W'		;
+	beq	+		;
+	cmp	#$91		;
 .endif
 ;	beq	+		;
 ;	cmp	#'2'		; case '2':
@@ -242,6 +244,8 @@ getmove	jsr	$ffe4		;int8_t getmove(void) {
 	cmp	#'s'		;
 	beq	+		;
 	cmp	#'S'		;
+	beq	+		;
+	cmp	#$11		;
 .endif
 ;	beq	+		;
 ;	cmp	#'3'		; case '3':
@@ -296,6 +300,8 @@ getmove	jsr	$ffe4		;int8_t getmove(void) {
 	cmp	#'a'		;
 	beq	+		;
 	cmp	#'A'		;
+	beq	+		;
+	cmp	#$9d		;
 .endif
 ;	beq	+		;
 ;	cmp	#'6'		; case '6':
@@ -314,6 +320,8 @@ getmove	jsr	$ffe4		;int8_t getmove(void) {
 	cmp	#'d'		;
 	beq	+		;
 	cmp	#'D'		;
+	beq	+		;
+	cmp	#$1d		;
 .endif
 ;	beq	+		;
 ;	cmp	#'7'		; case '7':
