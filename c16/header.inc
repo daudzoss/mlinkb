@@ -13,3 +13,5 @@ WHT	= $31
 RED	= $12
 GRN	= $15
 YEL	= $37
+
+CRSRDNS	:= SCREENH

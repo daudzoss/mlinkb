@@ -114,8 +114,14 @@ COPIED2	= $0400
 .endif	
 	.word	(+), 2055
 	.text	$99,$22,$1f,$09	; PRINT " CHR(31) CHR$(9) // BLU,enable
-	.text	$8e,$08,$13,$13	; CHR$(142) CHR$(8) CHR$(19) // UPPER,disabl,clr
-	.text	$93,$22,$3b	; "; (second home undoes windows on C16,C128...)
+	.text	$8e,$08		; CHR$(142) CHR$(8) // UPPER,disabl
+	.text	$13,$13		; HOME HOME // (undoes windows on C16,C128,...)
+CRSRDNS :?= 0
+.for d := 0, d < CRSRDNS, d += 1
+	.text	$11		; CRSR_DN
+.next
+	.text	$13,$11		; HOME CRSR_DN
+	.text	$22,$3b		; "; 
 	.text	$3a,$81,$49,$b2	; : FOR I =
 	.text	$30,$a4,$33,$3a	; 0 TO 3 :
 	.text	$81,$4a,$b2,$31	; FOR J = 1
@@ -137,18 +143,24 @@ COPIED2	= $0400
 .endif	
 	.text	$3a,$82,$3a	; : NEXT :
 	.text	$82,$3a,$99,$22	; NEXT : PRINT "
+	.text	$9c		; PUR
 	.text	$9c,$12,"(",$92,","
 	.text	$12,")",$92,"top "
 	.text	$12,"<",$92,","
 	.text	$12,">",$92,"bot "
 	.text	$12,"i",$92,","
 	.text	$12,"k",$92,"slide"
-.if SCREENH > $18
-	.text	$0d,$0d
+.if SCREENH > $17
+.for d := $17, d < SCREENH, d += 1
+	.text	$11		; CRSR_DN
+.next
+	.text	$22,$3a,$99,$a6	; " : print SPC(
+	.text	format("%2d",SCREENW-$16)
+	.text	$29,$3b,$22	; ) ; "
 .endif
-	.text	$1f,"github:"
-	.text	"daudzoss/mlinkb"
-	.text	$22,$3b		; ";
+	.text	$1f		; BLU
+	.text	"github:daudzoss/mlink"
+	.text	$13,$22,$3b	; HOME ";
 	.text	$3a,$9e		; : SYS main
 	.null	format("%4d",main)
 +	.word 0
@@ -189,6 +201,14 @@ main
 	lda	#BACKGND	;void main(void) [
 	sta	BKGRNDC		; BKGRNDC = BACKGND;
 	jsr	shuffle		; shuffle();
+	lda	SCREENC+SCREENW*SCREENH-2
+	sta	SCREENC+SCREENW*SCREENH-1
+	ldy	#SCREENW	;
+-	sta	SCREENC-1,y	;
+	dey			;
+	bne	-		;
+	lda	#'b'-'@'	;
+	sta	SCREENM+SCREENW*SCREENH-1
 -	jsr	getmove		; do {
 	jsr	drawall		;  getmove();
 	jsr	checkok		;  drawall();

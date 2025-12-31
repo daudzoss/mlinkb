@@ -173,18 +173,18 @@ drawcol	tya			;void drawcol(register uint8_t& y) { // 0|4|8|12
 	adc	ydiv4x5		;
 	sta	ydiv4x5		; static uint8_t ydiv4x5 = (y/4)*5; // 0|5|10|15
 	sec			;
-	adc	#<SCREENM	;
+	adc	#<(SCREENM+SCREENW);
 	sta	drawloc		;
 	lda	#>SCREENM	;
 	;adc	#0
-	sta	1+drawloc	; drawloc = (char*) (SCREENM+1 + (y / 4) * 5);
+	sta	1+drawloc	; drawloc = (char*) (SCREENM+SCREENW+1+(y/4)*5);
 	lda	ydiv4x5		;
 	sec			;
-	adc	#<SCREENC	;
+	adc	#<(SCREENC+SCREENW);
 	sta	attrloc		;
 	lda	#>SCREENC	;
 	;adc	#0
-	sta	1+attrloc	; attrloc = (char*) (SCREENC+1 + (y / 4) * 5);
+	sta	1+attrloc	; attrloc = (char*) (SCREENC+SCREENW+1+(y/4)*5);
 -	lda	state,y		; do {
 	jsr	drawtil		;  register uint8_t a = state[y]);
 	iny			;  drawtil(a);
