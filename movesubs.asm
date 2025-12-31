@@ -1,7 +1,9 @@
+ADDLKEY	:?= 0
+	
 missing	.byte	0		;static int4_t missing = 0;
 randnum	.byte	$55		;statig int8_t randnum = 0xbf;
 jumpto0	.word	allleft		;static uint8_t (*jumpto)(void)[8] = { allleft,
-jumpto1	.word	allrght		;                                      allright,
+jumpto1	.word	allrght		;                                      allrght,
 jumpto2	.word	slideup		;                                      slideup,
 jumpto3	.word	slidedn		;                                      slidedn,
 jumpto4	.word	topleft		;                                      topleft,
@@ -43,6 +45,7 @@ shuffle	ldy	#<$100		;void shuffle(void) {
 	bne	-		; }
 	rts			;} // shuffle()
 	
+.if ADDLKEY
 downby1	lda	state+0		;uint4_t downby1(void) {
 	sta	state+$10	; state[16] = state[0]; // temptop
 	ldy	#0		;
@@ -70,17 +73,24 @@ upby1	lda	state+$0f	;uint4_t upby1(void) {
 	and	#$0f		;
 	sta	missing		; return missing = (missing + 1) & 0x0f;
 	rts			;} // upby1()
+.endif
 
-allleft	jsr	downby1		;uint4_t allleft(void) { register uint4_t a;
+allleft
+.if ADDLKEY
+	jsr	downby1		;uint4_t allleft(void) { register uint4_t a;
 	jsr	downby1		; for (int unrolled = 4; unrolled; unrolled--)
 	jsr	downby1		;  a = downby1();
 	jsr	downby1		; return a; // new value of missing
+.endif
 	rts			;} // alleft()
 
-allrght	jsr	upby1		;uint4_t allrght(void) { register uint4_t a;
+allrght
+.if ADDLKEY
+	jsr	upby1		;uint4_t allrght(void) { register uint4_t a;
 	jsr	upby1		; for (int unrolled = 4; unrolled; unrolled--)
 	jsr	upby1		;  a = upby1();
 	jsr	upby1		; return a; // new value of missing
+.endif
 	rts			;} // allrght()
 
 rowmask	.byte	$03		;static const uint8_t rowmask = 0x03;
@@ -194,8 +204,6 @@ botrght	lda	state+$f	;uint4_t botrght(void) {
 ;;; codedupl
 +	rts			;} // botrght()
 
-ADDLKEY	:?= 0
-	
 getmove	jsr	$ffe4		;int8_t getmove(void) {
 	beq	getmove		; switch (register char a = getchar()) {
 
