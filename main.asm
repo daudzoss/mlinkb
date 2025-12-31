@@ -147,7 +147,7 @@ COPIED2	= $0400
 	.text	$0d,$0d
 .endif
 	.text	$1f,"github:"
-	.text	"daudzoss/mlin5k"
+	.text	"daudzoss/mlinkb"
 	.text	$22,$3b		; ";
 	.text	$3a,$9e		; : SYS main
 	.null	format("%4d",main)
