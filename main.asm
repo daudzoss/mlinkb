@@ -3,6 +3,8 @@ MIDLINK = 1<<6
 TOPLINK = 2<<6
 BOTLINK = 3<<6
 
+CAPTION :?= !SCREENC	; no screen color implies per-tile center caption
+
 .if BASIC
 *	= BASIC+1
 .else
