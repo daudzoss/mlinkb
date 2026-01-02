@@ -1,7 +1,7 @@
-all : mlinkb_pet.prg mlinkb_vic20.prg mlinkb_p500.prg mlinkb_c64.prg mlinkb_c16.prg
+all : mlinkb_40col.prg mlinkb_p80.prg mlinkb_vic20.prg mlinkb_p500.prg mlinkb_c64.prg mlinkb_c16.prg
 
-mlinkb_pet.prg : main.asm checksub.asm drawsubs.asm movesubs.asm pet/header.inc
-	64tass -a -DADDLKEY:=1 pet/header.inc main.asm -L mlinkb_pet.lst -o mlinkb_pet.prg
+mlinkb_40col.prg : main.asm checksub.asm drawsubs.asm movesubs.asm pet/40col.inc
+	64tass -a -DADDLKEY:=1 pet/40col.inc main.asm -L mlinkb_40col.lst -o mlinkb_40col.prg
 
 mlinkb_vic20.prg : main.asm checksub.asm drawsubs.asm movesubs.asm vic20/header.inc
 	64tass -a vic20/header.inc main.asm -L mlinkb_vic20.lst -o mlinkb_vic20.prg
