@@ -117,7 +117,9 @@ COPIED2	= $0400
 	.word	(+), 2055
 	.text	$99,$22,$1f,$09	; PRINT " CHR(31) CHR$(9) // BLU,enable
 	.text	$8e,$08		; CHR$(142) CHR$(8) // UPPER,disabl
+.if SCREENW > $17
 	.text	$13,$13		; HOME HOME // (undoes windows on C16,C128,...)
+.endif
 CRSRDNS :?= 0
 .for d := 0, d < CRSRDNS, d += 1
 	.text	$11		; CRSR_DN
@@ -141,7 +143,10 @@ CRSRDNS :?= 0
 .if SCREENW >= $28
 	.text	$41,$24,$28,$49	; A $ ( I
 	.text	$ac,$35,$aa,$4a	; * 5 + J
-	.text	$29,$3b		; ) ;
+	.text	$29		; )
+.if SCREENW == $28
+	.text	$3b		; ;
+.endif
 .endif	
 	.text	$3a,$82,$3a	; : NEXT :
 	.text	$82,$3a,$99,$22	; NEXT : PRINT "
